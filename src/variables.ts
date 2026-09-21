@@ -1,4 +1,4 @@
-import type ModuleInstance from './main.js'
+import type IkanInstance from './main.js'
 
 export type VariablesSchema = {
 	variable1: string
@@ -6,7 +6,7 @@ export type VariablesSchema = {
 	variable3: string
 }
 
-export function UpdateVariableDefinitions(self: ModuleInstance): void {
+export function UpdateVariableDefinitions(self: IkanInstance): void {
 	self.setVariableDefinitions({
 		variable1: { name: 'My first variable' },
 		variable2: { name: 'My second variable' },

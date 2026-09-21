@@ -1,4 +1,4 @@
-import type ModuleInstance from './main.js'
+import type IkanInstance from './main.js'
 
 export type FeedbacksSchema = {
 	sample_feedback: {
@@ -9,7 +9,7 @@ export type FeedbacksSchema = {
 	}
 }
 
-export function UpdateFeedbacks(self: ModuleInstance): void {
+export function UpdateFeedbacks(self: IkanInstance): void {
 	self.setFeedbackDefinitions({
 		sample_feedback: {
 			name: 'Example Feedback',

@@ -1,8 +1,8 @@
 import type { ModuleSchema } from './main.js'
-import type ModuleInstance from './main.js'
+import type IkanInstance from './main.js'
 import type { CompanionPresetDefinitions, CompanionPresetSection } from '@companion-module/base'
 
-export function UpdatePresets(self: ModuleInstance): void {
+export function UpdatePresets(self: IkanInstance): void {
 	const structure: CompanionPresetSection[] = [
 		{
 			id: 'section1',

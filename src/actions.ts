@@ -1,4 +1,4 @@
-import type ModuleInstance from './main.js'
+import type IkanInstance from './main.js'
 
 export type ActionsSchema = {
 	sample_action: {
@@ -8,7 +8,7 @@ export type ActionsSchema = {
 	}
 }
 
-export function UpdateActions(self: ModuleInstance): void {
+export function UpdateActions(self: IkanInstance): void {
 	self.setActionDefinitions({
 		sample_action: {
 			name: 'My First Action',

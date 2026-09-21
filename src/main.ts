@@ -16,7 +16,7 @@ export type ModuleSchema = {
 
 export { UpgradeScripts }
 
-export default class ModuleInstance extends InstanceBase<ModuleSchema> {
+export default class IkanInstance extends InstanceBase<ModuleSchema> {
 	config!: ModuleConfig // Setup in init()
 
 	constructor(internal: unknown) {
