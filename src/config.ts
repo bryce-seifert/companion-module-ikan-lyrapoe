@@ -1,27 +1,72 @@
-import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import type { SomeCompanionConfigField } from '@companion-module/base'
+import type { ValueScale } from './valueScale.js'
+
+export type ProtocolSetting = 'auto' | 'artnet' | 'sacn'
 
 export type ModuleConfig = {
-	host: string
-	port: number
+	discoveryTargets: string
+	discoveryInterval: number
+	protocol: ProtocolSetting
+	valueScale: ValueScale
 }
 
 export function GetConfigFields(): SomeCompanionConfigField[] {
 	return [
 		{
+			type: 'static-text',
+			id: 'info',
+			label: 'Discovery',
+			width: 12,
+			value:
+				'Fixtures are found with an Art-Net poll and their DMX address, universe and protocol are read from each ' +
+				'fixture. List broadcast addresses and/or individual fixture IPs to poll, separated by commas.',
+		},
+		{
 			type: 'textinput',
-			id: 'host',
-			label: 'Target IP',
+			id: 'discoveryTargets',
+			label: 'Poll addresses',
 			width: 8,
-			regex: Regex.IP,
+			default: '255.255.255.255',
 		},
 		{
 			type: 'number',
-			id: 'port',
-			label: 'Target Port',
+			id: 'discoveryInterval',
+			label: 'Re-poll every (seconds, 0 = startup only)',
 			width: 4,
-			min: 1,
-			max: 65535,
-			default: 8000,
+			min: 0,
+			max: 3600,
+			default: 30,
+		},
+		{
+			type: 'dropdown',
+			id: 'protocol',
+			label: 'Protocol',
+			width: 6,
+			default: 'auto',
+			choices: [
+				{ id: 'auto', label: 'Auto (as configured on each fixture)' },
+				{ id: 'artnet', label: 'Art-Net' },
+				{ id: 'sacn', label: 'sACN' },
+			],
+		},
+		{
+			type: 'dropdown',
+			id: 'valueScale',
+			label: 'Value scale',
+			description: 'How intensity, saturation, RGB and green/magenta are entered and displayed.',
+			width: 6,
+			default: 'percent',
+			choices: [
+				{ id: 'percent', label: 'Percentage' },
+				{ id: 'dmx', label: 'DMX (0-255)' },
+			],
 		},
 	]
+}
+
+export function parseDiscoveryTargets(value: string): string[] {
+	return value
+		.split(',')
+		.map((s) => s.trim())
+		.filter((s) => s.length > 0)
 }
