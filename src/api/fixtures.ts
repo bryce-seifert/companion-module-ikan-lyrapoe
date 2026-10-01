@@ -28,20 +28,25 @@ export interface FixtureProfile {
 	modes: Partial<Record<ColorMode, ChannelLayout>>
 }
 
-const FIXTURE_PROFILES: Record<string, FixtureProfile> = {
-	'LBF60B-POE': {
-		model: 'LBF60B-POE',
+/** Two-channel bi-color fixture: intensity and color temperature */
+function biColorProfile(model: string, minKelvin: number, maxKelvin: number): FixtureProfile {
+	return {
+		model,
 		channels: 2,
-		cctRange: { min: 2700, max: 6500 },
+		cctRange: { min: minKelvin, max: maxKelvin },
 		modeChannel: null,
 		modes: {
 			cct: { intensity: 1, cct: 2 },
 		},
-	},
-	'LCX10-POE': {
-		model: 'LCX10-POE',
+	}
+}
+
+/** Four-channel color fixture with CCT, HSI and RGB modes */
+function colorProfile(model: string, minKelvin: number, maxKelvin: number): FixtureProfile {
+	return {
+		model,
 		channels: 4,
-		cctRange: { min: 2700, max: 6500 },
+		cctRange: { min: minKelvin, max: maxKelvin },
 		// Channel 4: 0-85 CCT, 86-170 HSI, 171-255 RGB — the meaning of channels 1-3 follows it
 		modeChannel: { channel: 4, values: { cct: 0, hsi: 128, rgb: 255 } },
 		modes: {
@@ -49,17 +54,33 @@ const FIXTURE_PROFILES: Record<string, FixtureProfile> = {
 			hsi: { intensity: 1, hue: 2, saturation: 3 },
 			rgb: { red: 1, green: 2, blue: 3 },
 		},
-	},
+	}
 }
+
+/** Models are matched as part of the device name, so "LBX8" also matches "LBX8-POE" */
+const FIXTURE_PROFILES: FixtureProfile[] = [
+	biColorProfile('LBX5', 2700, 5600),
+	biColorProfile('LBX8', 3200, 5600),
+	biColorProfile('LBX10', 3200, 5600),
+	biColorProfile('LBX16', 2700, 5600),
+	biColorProfile('LBX20', 3200, 5600),
+	biColorProfile('LBX30', 2700, 6500),
+	biColorProfile('LBF60', 2700, 6500),
+	biColorProfile('LBF60B', 2700, 6500),
+	biColorProfile('LBF60Z', 2700, 6500),
+	colorProfile('LCX5', 2700, 5600),
+	colorProfile('LCX8', 2700, 6500),
+	colorProfile('LCX10', 2700, 6500),
+]
 
 /**
  * Used when the device name doesn't identify the model. It exposes every control: its channels 1-2 line up
- * with the CCT-only fixtures, and DMX is unicast to each fixture so the extra channels can't reach another one.
+ * with the bi-color fixtures, and DMX is unicast to each fixture so the extra channels can't reach another one.
  */
-export const UNKNOWN_FIXTURE_PROFILE: FixtureProfile = { ...FIXTURE_PROFILES['LCX10-POE'], model: 'Unknown' }
+export const UNKNOWN_FIXTURE_PROFILE: FixtureProfile = colorProfile('Unknown', 2700, 6500)
 
 // Longest first, so a model whose name contains another model's name wins
-const PROFILES_BY_MODEL_LENGTH = Object.values(FIXTURE_PROFILES).sort((a, b) => b.model.length - a.model.length)
+const PROFILES_BY_MODEL_LENGTH = [...FIXTURE_PROFILES].sort((a, b) => b.model.length - a.model.length)
 
 /**
  * Find the profile for a fixture from its device name. The name is user-editable in the fixture's web UI
