@@ -47,6 +47,7 @@ switch modes, since fixtures differ in what they support.
 - **Set Hue / Saturation**
 - **Set Red / Green / Blue**
 - **Set Color Mode** (CCT, HSI or RGB)
+- **Save Light Preset** / **Recall Light Preset** / **Clear Light Preset**
 - **Search for Fixtures**
 
 Setting a color temperature, green/magenta, hue/saturation or RGB value also switches the fixture
@@ -57,6 +58,20 @@ into the matching color mode.
 - **Fixture Online** — the fixture answered the most recent poll
 - **Color Mode** — the fixture is in the chosen mode
 - **Intensity** — the intensity is above a threshold
+- **Light Preset Active** — every fixture in the preset still holds the saved values
+
+### Light Presets
+
+Presets can be stored with the connection's configuration, so they survive restarts and are included
+when you export your setup. There are 100 available preset slots.
+
+**Save Light Preset** stores the current mode,
+intensity, color temperature, green/magenta, hue/saturation and RGB values of the chosen fixtures
+in a slot, replacing what it held.
+**Recall Light Preset** sends those values back to every fixture in the preset and leaves other
+fixtures alone. Fixtures are remembered by MAC address, so a preset still recalls
+after a fixture changes IP or DMX address. Fixtures that are offline or no longer found are skipped, and
+a preset only shows as active while all of its fixtures are online.
 
 ### Presets
 
@@ -64,6 +79,9 @@ There is a section for **All Fixtures** and one per fixture, ordered by DMX addr
 intensity buttons (full, off, ±, and a rotary encoder); All Fixtures adds 3200K and 5600K. Each
 fixture also gets color temperature buttons and a rotary encoder, plus color mode, HSI and RGB buttons where the fixture supports them,
 and status buttons showing the current values.
+
+The **Light Presets** section has a recall and a save button for slots 1-10. You can change the slot in
+the action to use the others. Recall buttons are lit while every fixture in the preset still matches it.
 
 ### Variables
 

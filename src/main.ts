@@ -7,6 +7,7 @@ import { UpdateFeedbacks, type FeedbacksSchema } from './feedbacks.js'
 import { UpdatePresets } from './presets.js'
 import { FixtureManager, type ManagedFixture, type StatePatch } from './fixtureManager.js'
 import { createDgramDiscoverySocket } from './api/index.js'
+import { captureLightPreset, LIGHT_PRESET_SLOTS, lightPresetSlotKey, type LightPresets } from './lightPresets.js'
 
 export type ModuleSchema = {
 	config: ModuleConfig
@@ -33,6 +34,7 @@ export default class IkanInstance extends InstanceBase<ModuleSchema> {
 	}
 
 	async init(config: ModuleConfig): Promise<void> {
+		config.lightPresets ??= {}
 		this.config = config
 		this.fixtures = new FixtureManager({
 			createSocket: createDgramDiscoverySocket,
@@ -54,10 +56,14 @@ export default class IkanInstance extends InstanceBase<ModuleSchema> {
 	}
 
 	async configUpdated(config: ModuleConfig): Promise<void> {
+		// The light presets have no config field, so keep the saved ones if a config arrives without them
+		config.lightPresets ??= this.config.lightPresets
 		const scaleChanged = config.valueScale !== this.config.valueScale
+		const lightPresetsChanged = JSON.stringify(config.lightPresets) !== JSON.stringify(this.config.lightPresets)
 		this.config = config
 		// Option ranges, preset values and variable values are all in the chosen scale
 		if (scaleChanged) this.#fixturesChanged()
+		if (lightPresetsChanged) this.checkFeedbacks('light_preset_active')
 		this.fixtures.setProtocolSetting(config.protocol)
 		this.#scheduleDiscovery()
 		void this.discover()
@@ -83,7 +89,8 @@ export default class IkanInstance extends InstanceBase<ModuleSchema> {
 					this.updateStatus(InstanceStatus.UnknownWarning, `${online}/${all.length} fixtures online`)
 				else this.updateStatus(InstanceStatus.Ok, `${all.length} fixture${all.length === 1 ? '' : 's'}`)
 			}
-			if (changed) this.checkFeedbacks('fixture_online')
+			// Light presets only match while all their fixtures are online
+			if (changed) this.checkFeedbacks('fixture_online', 'light_preset_active')
 		} catch (e) {
 			this.#lastStatusSummary = null
 			this.updateStatus(InstanceStatus.UnknownError, `Discovery failed: ${String(e)}`)
@@ -98,6 +105,51 @@ export default class IkanInstance extends InstanceBase<ModuleSchema> {
 		this.fixtures.updateState(fixtures, patch)
 		UpdateVariableValues(this, fixtures)
 		this.checkFeedbacks('color_mode', 'intensity_above')
+		const presets = Object.values(this.config.lightPresets)
+		if (presets.some((preset) => fixtures.some((f) => f.id in preset))) this.checkFeedbacks('light_preset_active')
+	}
+
+	/** Store the current state of the fixtures in the slot, replacing what it held */
+	saveLightPreset(slot: number, fixtures: ManagedFixture[]): void {
+		const key = this.#lightPresetSlotKey(slot)
+		if (!key) return
+		// Refuse rather than overwrite a good preset when, say, discovery hasn't found the fixtures yet
+		if (fixtures.length === 0) {
+			this.log('warn', `Not saving light preset ${key}: no fixtures found`)
+			return
+		}
+		this.#setLightPresets({ ...this.config.lightPresets, [key]: captureLightPreset(fixtures) })
+	}
+
+	recallLightPreset(slot: number): void {
+		const key = this.#lightPresetSlotKey(slot)
+		if (!key) return
+		const preset = this.config.lightPresets[key]
+		if (!preset) {
+			this.log('warn', `Light Preset Slot ${key} is empty`)
+			return
+		}
+		const online = this.fixtures.getFixtures(Object.keys(preset)).filter((f) => f.online)
+		this.applyState(online, (f) => preset[f.id])
+	}
+
+	clearLightPreset(slot: number): void {
+		const key = this.#lightPresetSlotKey(slot)
+		if (!key || !this.config.lightPresets[key]) return
+		const { [key]: _cleared, ...rest } = this.config.lightPresets
+		this.#setLightPresets(rest)
+	}
+
+	#lightPresetSlotKey(slot: number): string | null {
+		const key = lightPresetSlotKey(slot)
+		if (!key) this.log('warn', `Light Preset Slot must be 1-${LIGHT_PRESET_SLOTS}, not "${slot}"`)
+		return key
+	}
+
+	#setLightPresets(lightPresets: LightPresets): void {
+		this.config = { ...this.config, lightPresets }
+		this.saveConfig(this.config)
+		this.checkFeedbacks('light_preset_active')
 	}
 
 	#stopDiscoveryTimer(): void {

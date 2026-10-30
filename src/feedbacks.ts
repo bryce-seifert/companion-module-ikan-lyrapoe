@@ -8,12 +8,14 @@ import {
 	type FixtureTargetOptions,
 } from './actions.js'
 import { effectiveMode, type ColorMode } from './api/index.js'
+import { isLightPresetActive, lightPresetAt, lightPresetSlotOption } from './lightPresets.js'
 import { fromState, levelLabel, levelRange } from './valueScale.js'
 
 export type FeedbacksSchema = {
 	fixture_online: { type: 'boolean'; options: FixtureTargetOptions }
 	color_mode: { type: 'boolean'; options: { fixtures: string[]; mode: ColorMode } }
 	intensity_above: { type: 'boolean'; options: FixtureTargetOptions & { threshold: number } }
+	light_preset_active: { type: 'boolean'; options: { slot: number } }
 }
 
 export function UpdateFeedbacks(self: IkanInstance): void {
@@ -64,6 +66,17 @@ export function UpdateFeedbacks(self: IkanInstance): void {
 					targets.length > 0 &&
 					targets.every((f) => fromState(scale, 'intensity', f.state.intensity) > feedback.options.threshold)
 				)
+			},
+		},
+		light_preset_active: {
+			name: 'Light Preset Active',
+			description: 'True while every fixture in the preset still holds the saved values',
+			type: 'boolean',
+			defaultStyle: { bgcolor: combineRgb(0, 200, 0), color: combineRgb(0, 0, 0) },
+			options: [lightPresetSlotOption()],
+			callback: (feedback) => {
+				const preset = lightPresetAt(self.config.lightPresets, feedback.options.slot)
+				return !!preset && isLightPresetActive(preset, self.fixtures)
 			},
 		},
 	})

@@ -1,4 +1,5 @@
 import type { SomeCompanionConfigField } from '@companion-module/base'
+import type { LightPresets } from './lightPresets.js'
 import type { ValueScale } from './valueScale.js'
 
 export type ProtocolSetting = 'auto' | 'artnet' | 'sacn'
@@ -8,6 +9,8 @@ export type ModuleConfig = {
 	discoveryInterval: number
 	protocol: ProtocolSetting
 	valueScale: ValueScale
+	/** Saved by the light preset actions; has no config field */
+	lightPresets: LightPresets
 }
 
 export function GetConfigFields(): SomeCompanionConfigField[] {

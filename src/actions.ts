@@ -2,6 +2,7 @@ import type { CompanionInputFieldDropdown, CompanionInputFieldMultiDropdown } fr
 import type IkanInstance from './main.js'
 import type { FixtureTarget, ManagedFixture } from './fixtureManager.js'
 import { clamp, COLOR_MODES, DEFAULT_FIXTURE_STATE, type ColorMode } from './api/index.js'
+import { lightPresetSlotOption } from './lightPresets.js'
 import { fromState, levelLabel, levelOption, levelRange, toState } from './valueScale.js'
 
 export type FixtureTargetOptions = { target: FixtureTarget; fixtures: string[] }
@@ -15,6 +16,9 @@ export type ActionsSchema = {
 	set_hsi: { options: FixtureTargetOptions & { hue: number; saturation: number } }
 	set_rgb: { options: FixtureTargetOptions & { red: number; green: number; blue: number } }
 	set_mode: { options: { fixtures: string[]; mode: ColorMode } }
+	save_light_preset: { options: FixtureTargetOptions & { slot: number } }
+	recall_light_preset: { options: { slot: number } }
+	clear_light_preset: { options: { slot: number } }
 	discover: { options: Record<string, never> }
 }
 
@@ -181,6 +185,29 @@ export function UpdateActions(self: IkanInstance): void {
 			options: [modeFixturesOption(self, true), modeOption()],
 			callback: (event) => {
 				self.applyState(self.fixtures.getFixtures(event.options.fixtures), { mode: event.options.mode })
+			},
+		},
+		save_light_preset: {
+			name: 'Save Light Preset',
+			description: 'Store the current state of the fixtures in a preset slot, replacing what it held',
+			options: [...fixtureTargetOptions(self), lightPresetSlotOption()],
+			callback: (event) => {
+				self.saveLightPreset(event.options.slot, targetsOf(self, event.options))
+			},
+		},
+		recall_light_preset: {
+			name: 'Recall Light Preset',
+			description: 'Restore every fixture saved in the preset; fixtures not saved in it are left alone',
+			options: [lightPresetSlotOption()],
+			callback: (event) => {
+				self.recallLightPreset(event.options.slot)
+			},
+		},
+		clear_light_preset: {
+			name: 'Clear Light Preset',
+			options: [lightPresetSlotOption()],
+			callback: (event) => {
+				self.clearLightPreset(event.options.slot)
 			},
 		},
 		discover: {

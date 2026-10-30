@@ -14,6 +14,7 @@ import type { ManagedFixture } from './fixtureManager.js'
 import type { ModuleSchema } from './main.js'
 import type IkanInstance from './main.js'
 import { COLOR_MODES } from './api/index.js'
+import { LIGHT_PRESET_BUTTONS } from './lightPresets.js'
 import { fromState, levelSuffix, type LevelParameter, type ValueScale } from './valueScale.js'
 
 type PresetAction = CompanionPresetAction<ActionsSchema>
@@ -322,12 +323,74 @@ function buildSection(
 	return { id: sectionId, name: label, definitions: groups }
 }
 
+/** Recall and save buttons for the first light preset slots */
+function buildLightPresetSection(presets: CompanionPresetDefinitions<ModuleSchema>): CompanionPresetSection {
+	const slots = Array.from({ length: LIGHT_PRESET_BUTTONS }, (_, i) => i + 1)
+	const recallIds = slots.map((slot) => {
+		const id = `light_preset_recall_${slot}`
+		presets[id] = {
+			type: 'simple',
+			name: `Recall Light Preset ${slot}`,
+			style: buttonStyle(`PRESET\\n${slot}`, GREY),
+			steps: [{ down: [{ actionId: 'recall_light_preset', options: { slot } }], up: [] }],
+			feedbacks: [
+				{
+					feedbackId: 'light_preset_active',
+					options: { slot },
+					style: { bgcolor: combineRgb(0, 200, 0), color: BLACK },
+				},
+			],
+			keywords: ['scene', 'look', 'memory'],
+		}
+		return id
+	})
+	const saveIds = slots.map((slot) => {
+		const id = `light_preset_save_${slot}`
+		presets[id] = {
+			type: 'simple',
+			name: `Save Light Preset ${slot}`,
+			style: buttonStyle(`SAVE\\n${slot}`, combineRgb(140, 50, 50)),
+			steps: [
+				{
+					down: [{ actionId: 'save_light_preset', options: { target: 'all', fixtures: [], slot } }],
+					up: [],
+				},
+			],
+			feedbacks: [],
+			keywords: ['store', 'scene', 'look', 'memory'],
+		}
+		return id
+	})
+
+	return {
+		id: 'light_presets',
+		name: 'Light Presets',
+		definitions: [
+			{
+				id: 'light_presets_recall',
+				name: 'Recall',
+				description: 'Lit while every fixture in the preset still matches it',
+				type: 'simple',
+				presets: recallIds,
+			},
+			{
+				id: 'light_presets_save',
+				name: 'Save',
+				description: 'Store the current state of all fixtures in the slot',
+				type: 'simple',
+				presets: saveIds,
+			},
+		],
+	}
+}
+
 export function UpdatePresets(self: IkanInstance): void {
 	const presets: CompanionPresetDefinitions<ModuleSchema> = {}
 	const scale = self.config.valueScale
 	const structure = [
 		buildSection(presets, scale, 'all', 'All Fixtures', null),
 		...self.fixtures.fixtures.map((f) => buildSection(presets, scale, f.id, `${f.name} (DMX ${f.dmx.dmxAddress})`, f)),
+		buildLightPresetSection(presets),
 	]
 	self.setPresetDefinitions(structure, presets)
 }
