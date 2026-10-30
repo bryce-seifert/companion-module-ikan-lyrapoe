@@ -356,7 +356,13 @@ function buildLightPresetSection(presets: CompanionPresetDefinitions<ModuleSchem
 					up: [],
 				},
 			],
-			feedbacks: [],
+			feedbacks: [
+				{
+					feedbackId: 'light_preset_saved',
+					options: { slot },
+					style: { text: `RESAVE\\n${slot}`, bgcolor: combineRgb(200, 0, 0), color: WHITE },
+				},
+			],
 			keywords: ['store', 'scene', 'look', 'memory'],
 		}
 		return id
@@ -376,7 +382,7 @@ function buildLightPresetSection(presets: CompanionPresetDefinitions<ModuleSchem
 			{
 				id: 'light_presets_save',
 				name: 'Save',
-				description: 'Store the current state of all fixtures in the slot',
+				description: 'Store the current state of all fixtures in the slot; lit when the slot already holds a preset',
 				type: 'simple',
 				presets: saveIds,
 			},

@@ -16,6 +16,7 @@ export type FeedbacksSchema = {
 	color_mode: { type: 'boolean'; options: { fixtures: string[]; mode: ColorMode } }
 	intensity_above: { type: 'boolean'; options: FixtureTargetOptions & { threshold: number } }
 	light_preset_active: { type: 'boolean'; options: { slot: number } }
+	light_preset_saved: { type: 'boolean'; options: { slot: number } }
 }
 
 export function UpdateFeedbacks(self: IkanInstance): void {
@@ -78,6 +79,14 @@ export function UpdateFeedbacks(self: IkanInstance): void {
 				const preset = lightPresetAt(self.config.lightPresets, feedback.options.slot)
 				return !!preset && isLightPresetActive(preset, self.fixtures)
 			},
+		},
+		light_preset_saved: {
+			name: 'Light Preset Saved',
+			description: 'True when the slot holds a saved preset',
+			type: 'boolean',
+			defaultStyle: { bgcolor: combineRgb(200, 0, 0), color: combineRgb(255, 255, 255) },
+			options: [lightPresetSlotOption()],
+			callback: (feedback) => !!lightPresetAt(self.config.lightPresets, feedback.options.slot),
 		},
 	})
 }

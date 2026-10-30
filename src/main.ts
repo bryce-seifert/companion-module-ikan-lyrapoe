@@ -63,7 +63,7 @@ export default class IkanInstance extends InstanceBase<ModuleSchema> {
 		this.config = config
 		// Option ranges, preset values and variable values are all in the chosen scale
 		if (scaleChanged) this.#fixturesChanged()
-		if (lightPresetsChanged) this.checkFeedbacks('light_preset_active')
+		if (lightPresetsChanged) this.checkFeedbacks('light_preset_active', 'light_preset_saved')
 		this.fixtures.setProtocolSetting(config.protocol)
 		this.#scheduleDiscovery()
 		void this.discover()
@@ -149,7 +149,7 @@ export default class IkanInstance extends InstanceBase<ModuleSchema> {
 	#setLightPresets(lightPresets: LightPresets): void {
 		this.config = { ...this.config, lightPresets }
 		this.saveConfig(this.config)
-		this.checkFeedbacks('light_preset_active')
+		this.checkFeedbacks('light_preset_active', 'light_preset_saved')
 	}
 
 	#stopDiscoveryTimer(): void {

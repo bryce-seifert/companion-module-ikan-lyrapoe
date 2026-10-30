@@ -59,6 +59,7 @@ into the matching color mode.
 - **Color Mode** — the fixture is in the chosen mode
 - **Intensity** — the intensity is above a threshold
 - **Light Preset Active** — every fixture in the preset still holds the saved values
+- **Light Preset Saved** — the slot holds a saved preset
 
 ### Light Presets
 
@@ -81,7 +82,8 @@ fixture also gets color temperature buttons and a rotary encoder, plus color mod
 and status buttons showing the current values.
 
 The **Light Presets** section has a recall and a save button for slots 1-10. You can change the slot in
-the action to use the others. Recall buttons are lit while every fixture in the preset still matches it.
+the action to use the others. Recall buttons are lit while every fixture in the preset still matches it,
+and save buttons are lit and show OVERWRITE when the slot already holds a preset.
 
 ### Variables
 
