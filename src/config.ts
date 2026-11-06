@@ -34,7 +34,8 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		{
 			type: 'number',
 			id: 'discoveryInterval',
-			label: 'Re-poll every (seconds, 0 = startup only)',
+			label: 'Search For Fixtures Interval (Seconds)',
+			tooltip: '0 will disable the poll, and only search on connection startup',
 			width: 4,
 			min: 0,
 			max: 3600,

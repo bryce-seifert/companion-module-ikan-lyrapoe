@@ -5,6 +5,7 @@ import {
 	discoverFixtures,
 	encodeFixtureState,
 	getFixtureProfile,
+	listNetworkAdapters,
 	UNKNOWN_FIXTURE_PROFILE,
 	type DiscoveredFixture,
 	type DiscoverySocket,
@@ -108,9 +109,11 @@ export class FixtureManager {
 		const found = await discoverFixtures({
 			createSocket: this.#options.createSocket,
 			targets,
+			adapters: listNetworkAdapters(),
 			timeoutMs,
 			pollCount: 3,
 			httpTimeoutMs: 3000,
+			log: this.#options.log,
 		})
 
 		const seen = new Set<string>()

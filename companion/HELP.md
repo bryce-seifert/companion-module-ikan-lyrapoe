@@ -5,12 +5,10 @@ Controls Ikan Lyra PoE fixtures over Art-Net or sACN.
 ### Discovery
 
 A single connection manages every fixture on the network. Fixtures are found with an Art-Net poll
-(they answer even when set to sACN), and each fixture's DMX address, universe and protocol are then
-read from its built-in web interface Set **Poll addresses** to your subnet's broadcast address (or `255.255.255.255`),
+(they answer even when set to sACN). Set **Poll addresses** to your subnet's broadcast address (or `255.255.255.255`),
 and add individual fixture IPs if they are on a different subnet. Separate several addresses with commas.
 
-The network is polled again every **Re-poll every** seconds (0 polls only at startup) to pick up new
-fixtures. The **Search for Fixtures** action polls on demand.
+The connection checks the network for fixtures again every based on the value set in the **Search For Fixtures Interval**. The **Search for Fixtures** action polls on demand.
 
 ### Fixture names
 
